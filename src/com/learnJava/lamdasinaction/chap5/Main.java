@@ -4,37 +4,65 @@ import com.learnJava.lamdasinaction.chap4.Dish;
 
 import java.util.*;
 import java.util.stream.Stream;
+import java.util.Comparator.*;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.Comparator.comparing;
 
 public class Main {
-    static Predicate<Dish> veggie = Dish::isVegetarian;
-    static String[] arrayOfWords = {"Hello", "World", "How", "Are", "You"};
-    static String[] twoOfWords = {"This", "Is", "Number", "Two"};
+    static Trader raoul = new Trader("Raoul", "Cambridge");
+    static Trader mario = new Trader("Mario", "Milan");
+    static Trader alan = new Trader("Alan", "Cambridge");
+    static Trader brian = new Trader("Brian", "Cambridge");
 
-    static List<String> one = Arrays.asList(arrayOfWords);
-    static List<String> two = Arrays.asList(twoOfWords);
-    static Stream<String> streamOfWords = Arrays.stream(arrayOfWords);
-    static List<Integer> numbers = Arrays.asList(1,2,1,3,3,2,4);
+    static List<Transaction> transactions = Arrays.asList(
+            new Transaction(brian, 2011, 300),
+            new Transaction(raoul, 2012, 1000),
+            new Transaction(raoul, 2011, 400),
+            new Transaction(mario, 2012, 710),
+            new Transaction(mario, 2012, 700),
+            new Transaction(alan, 2012, 950)
+    );
 
     public static void main(String[] args) {
-//        //distinct method
-//        numbers.stream()
-//                        .filter(x -> x % 2 ==0)
-//                                .distinct()
-//                                        .forEach(x -> System.out.print(x + " "));
-//
-//        //filter method
-//        Dish.menu.stream()
-//                .filter(veggie)
-//                .forEach(x -> System.out.print(x + " "));
-        List<String> newWords =
-                streamOfWords.
-                map(x -> x.split(""))
-                .flatMap(Arrays::stream)
-                .distinct()
-                .collect(toList());
 
-        System.out.println(newWords);
+        //find all transactions in 2011 & sort ascending order
+        transactions.stream()
+                .filter(x -> x.getYear() == 2011)
+                .sorted(comparing(Transaction::getValue))
+                .forEach(System.out::println);
+
+        //Unique cities where traders work
+        transactions.stream()
+                .map(x -> x.getTrader().getCity())
+                .distinct()
+                .forEach(System.out::println);
+
+        //find all traders from Cambridge and sort them by name
+        transactions.stream()
+                .map(Transaction::getTrader)
+                .filter(y -> y.getCity() == "Cambridge")
+                .distinct()
+                .sorted(comparing(Trader::getName))
+                .forEach(System.out::println);
+
+        //Return a string of all traders names alphabetically
+        String names = transactions.stream()
+                .map(x -> x.getTrader().getName())
+                .distinct()
+                .sorted()
+                .reduce("", (a,b) -> a.concat(b));
+
+        //Are any traders based in Milan
+        boolean milan = transactions.stream()
+                .map(x -> x.getTrader())
+                .anyMatch(y -> y.getCity() == "Milan");
+        System.out.println("True or False there are traders from Milan: " + milan);
+
+        //print all transaction values from cambridge
+        transactions.stream()
+                .filter(x -> x.getTrader().getCity() == "Cambridge")
+                .map(Transaction::getValue)
+                .sorted()
+                .forEach(System.out::println);
     }
 }
